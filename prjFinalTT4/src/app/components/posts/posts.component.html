@@ -1,0 +1,15 @@
+<div class="posts-container">
+  <h2>Publications</h2>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="loading">Chargement...</div>
+  <form (ngSubmit)="createPost()">
+    <textarea [(ngModel)]="newPostContent" name="content" placeholder="Exprimez-vous..." required></textarea>
+    <button type="submit" [disabled]="loading || !newPostContent.trim()">Publier</button>
+  </form>
+  <ul>
+    <li *ngFor="let post of posts">
+      <div class="post-content">{{ post.content }}</div>
+      <button (click)="deletePost(post.id)" *ngIf="authService.isLoggedIn()">Supprimer</button>
+    </li>
+  </ul>
+</div>

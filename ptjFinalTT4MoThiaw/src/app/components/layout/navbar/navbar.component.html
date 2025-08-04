@@ -1,0 +1,66 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo et titre -->
+    <div class="navbar-brand">
+      <a routerLink="/accueil" class="brand-link">
+        <i class="icon-social"></i>
+        <span class="brand-text">Réseau Social</span>
+      </a>
+    </div>
+
+    <!-- Menu de navigation -->
+    <div class="navbar-menu" [class.active]="isMenuOpen">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a routerLink="/accueil" routerLinkActive="active" class="nav-link" (click)="closeMenu()">
+            <i class="icon-home"></i>
+            <span>Accueil</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/profil" routerLinkActive="active" class="nav-link" (click)="closeMenu()">
+            <i class="icon-user"></i>
+            <span>Mon Profil</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/utilisateurs" routerLinkActive="active" class="nav-link" (click)="closeMenu()">
+            <i class="icon-users"></i>
+            <span>Utilisateurs</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Profil utilisateur -->
+    <div class="navbar-user" *ngIf="currentUser">
+      <div class="user-info">
+        <div class="user-avatar">
+          <img 
+            [src]="currentUser.photo_profil || '/assets/default-avatar.png'" 
+            [alt]="currentUser.prenom + ' ' + currentUser.nom"
+            onerror="this.src='/assets/default-avatar.png'"
+          >
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</span>
+          <span class="user-email">{{ currentUser.email }}</span>
+        </div>
+      </div>
+      
+      <div class="user-actions">
+        <button class="btn-logout" (click)="logout()" title="Se déconnecter">
+          <i class="icon-logout"></i>
+          <span>Déconnexion</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bouton menu mobile -->
+    <button class="navbar-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>

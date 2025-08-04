@@ -1,0 +1,117 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Inscription</h1>
+      <p>Créez votre compte sur notre réseau social</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="register-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prenom">Prénom *</label>
+          <input
+            type="text"
+            id="prenom"
+            name="prenom"
+            [(ngModel)]="registerData.prenom"
+            required
+            class="form-control"
+            placeholder="Votre prénom"
+            [disabled]="loading"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="nom">Nom *</label>
+          <input
+            type="text"
+            id="nom"
+            name="nom"
+            [(ngModel)]="registerData.nom"
+            required
+            class="form-control"
+            placeholder="Votre nom"
+            [disabled]="loading"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="registerData.email"
+          required
+          email
+          class="form-control"
+          placeholder="votre@email.com"
+          [disabled]="loading"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe *</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="registerData.mot_de_passe"
+          required
+          minlength="6"
+          class="form-control"
+          placeholder="Au moins 6 caractères"
+          [disabled]="loading"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmer le mot de passe *</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          required
+          class="form-control"
+          placeholder="Répétez votre mot de passe"
+          [disabled]="loading"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="bio">Bio (optionnel)</label>
+        <textarea
+          id="bio"
+          name="bio"
+          [(ngModel)]="registerData.bio"
+          class="form-control"
+          placeholder="Parlez-nous de vous..."
+          rows="3"
+          [disabled]="loading"
+        ></textarea>
+      </div>
+
+      <div class="error-message" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="!registerForm.form.valid || loading"
+      >
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Création...' : 'Créer mon compte' }}
+      </button>
+    </form>
+
+    <div class="register-footer">
+      <p>
+        Déjà un compte ?
+        <a routerLink="/connexion" class="link">Se connecter</a>
+      </p>
+    </div>
+  </div>
+</div>

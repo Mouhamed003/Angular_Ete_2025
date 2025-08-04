@@ -1,0 +1,209 @@
+<div class="home-container">
+  <!-- Formulaire de création de post -->
+  <div class="create-post-card">
+    <div class="create-post-header">
+      <div class="user-avatar">
+        <img 
+          [src]="currentUser?.photo_profil || '/assets/default-avatar.png'" 
+          [alt]="currentUser?.prenom + ' ' + currentUser?.nom"
+          onerror="this.src='/assets/default-avatar.png'"
+        >
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ currentUser?.prenom }} {{ currentUser?.nom }}</span>
+      </div>
+    </div>
+
+    <form (ngSubmit)="createPost()" class="create-post-form">
+      <div class="form-group">
+        <textarea
+          [(ngModel)]="newPost.contenu"
+          name="contenu"
+          placeholder="Que voulez-vous partager ?"
+          class="post-textarea"
+          rows="3"
+          [disabled]="isCreatingPost"
+        ></textarea>
+      </div>
+
+      <div class="form-group" *ngIf="newPost.image">
+        <label for="image">URL de l'image (optionnel)</label>
+        <input
+          type="url"
+          id="image"
+          [(ngModel)]="newPost.image"
+          name="image"
+          placeholder="https://exemple.com/image.jpg"
+          class="form-control"
+          [disabled]="isCreatingPost"
+        >
+      </div>
+
+      <div class="create-post-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="newPost.image = newPost.image ? '' : 'https://'"
+          [disabled]="isCreatingPost"
+        >
+          📷 {{ newPost.image ? 'Retirer image' : 'Ajouter image' }}
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="!newPost.contenu.trim() || isCreatingPost"
+        >
+          <span *ngIf="isCreatingPost" class="spinner"></span>
+          {{ isCreatingPost ? 'Publication...' : 'Publier' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div class="error-message" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <!-- Chargement -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner-large"></div>
+    <p>Chargement des publications...</p>
+  </div>
+
+  <!-- Liste des posts -->
+  <div class="posts-list" *ngIf="!loading">
+    <div class="post-card" *ngFor="let post of posts">
+      <!-- En-tête du post -->
+      <div class="post-header">
+        <div class="post-author">
+          <div class="author-avatar">
+            <img 
+              [src]="post.photo_profil || '/assets/default-avatar.png'" 
+              [alt]="post.prenom + ' ' + post.nom"
+              onerror="this.src='/assets/default-avatar.png'"
+            >
+          </div>
+          <div class="author-info">
+            <span class="author-name">{{ post.prenom }} {{ post.nom }}</span>
+            <span class="post-date">{{ formatDate(post.date_creation) }}</span>
+          </div>
+        </div>
+        
+        <div class="post-actions" *ngIf="canEditPost(post)">
+          <button class="btn-icon" title="Modifier">✏️</button>
+          <button class="btn-icon" title="Supprimer">🗑️</button>
+        </div>
+      </div>
+
+      <!-- Contenu du post -->
+      <div class="post-content">
+        <p class="post-text">{{ post.contenu }}</p>
+        <div class="post-image" *ngIf="post.image">
+          <img [src]="post.image" [alt]="'Image de ' + post.prenom" onerror="this.style.display='none'">
+        </div>
+      </div>
+
+      <!-- Statistiques du post -->
+      <div class="post-stats">
+        <span class="stat-item">{{ post.nombre_likes }} j'aime</span>
+        <span class="stat-item">{{ post.nombre_commentaires }} commentaire(s)</span>
+      </div>
+
+      <!-- Actions du post -->
+      <div class="post-interactions">
+        <button 
+          class="interaction-btn"
+          [class.active]="post.user_a_like"
+          (click)="toggleLike(post)"
+        >
+          <span class="icon">{{ post.user_a_like ? '❤️' : '🤍' }}</span>
+          <span>J'aime</span>
+        </button>
+
+        <button 
+          class="interaction-btn"
+          (click)="toggleComments(post.id)"
+        >
+          <span class="icon">💬</span>
+          <span>Commenter</span>
+        </button>
+      </div>
+
+      <!-- Section des commentaires -->
+      <div class="comments-section" *ngIf="showComments[post.id]">
+        <!-- Formulaire d'ajout de commentaire -->
+        <div class="add-comment">
+          <div class="comment-avatar">
+            <img 
+              [src]="currentUser?.photo_profil || '/assets/default-avatar.png'" 
+              [alt]="currentUser?.prenom + ' ' + currentUser?.nom"
+              onerror="this.src='/assets/default-avatar.png'"
+            >
+          </div>
+          <div class="comment-input-group">
+            <input
+              type="text"
+              [(ngModel)]="newComment[post.id]"
+              placeholder="Écrivez un commentaire..."
+              class="comment-input"
+              (keyup.enter)="addComment(post.id)"
+            >
+            <button 
+              class="btn-send"
+              (click)="addComment(post.id)"
+              [disabled]="!newComment[post.id] || !newComment[post.id].trim()"
+            >
+              ➤
+            </button>
+          </div>
+        </div>
+
+        <!-- Chargement des commentaires -->
+        <div class="loading-comments" *ngIf="loadingComments[post.id]">
+          <div class="spinner"></div>
+          <span>Chargement des commentaires...</span>
+        </div>
+
+        <!-- Liste des commentaires -->
+        <div class="comments-list" *ngIf="comments[post.id]">
+          <div class="comment-item" *ngFor="let comment of comments[post.id]">
+            <div class="comment-avatar">
+              <img 
+                [src]="comment.photo_profil || '/assets/default-avatar.png'" 
+                [alt]="comment.prenom + ' ' + comment.nom"
+                onerror="this.src='/assets/default-avatar.png'"
+              >
+            </div>
+            <div class="comment-content">
+              <div class="comment-bubble">
+                <div class="comment-author">{{ comment.prenom }} {{ comment.nom }}</div>
+                <div class="comment-text">{{ comment.contenu }}</div>
+              </div>
+              <div class="comment-meta">
+                <span class="comment-date">{{ formatDate(comment.date_creation) }}</span>
+                <button 
+                  class="comment-like-btn"
+                  [class.active]="comment.user_a_like"
+                  (click)="toggleCommentLike(comment)"
+                >
+                  {{ comment.user_a_like ? '❤️' : '🤍' }} {{ comment.nombre_likes }}
+                </button>
+                <button class="comment-action" *ngIf="canEditComment(comment)">Modifier</button>
+                <button class="comment-action" *ngIf="canEditComment(comment)">Supprimer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message si aucun post -->
+    <div class="no-posts" *ngIf="posts.length === 0 && !loading">
+      <div class="no-posts-icon">📝</div>
+      <h3>Aucune publication pour le moment</h3>
+      <p>Soyez le premier à partager quelque chose !</p>
+    </div>
+  </div>
+</div>
